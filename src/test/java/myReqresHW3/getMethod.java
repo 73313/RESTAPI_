@@ -1,44 +1,67 @@
 package myReqresHW3;
 
+import Pojo.UserDTO;
 import io.restassured.RestAssured;
-import io.restassured.http.ContentType;
+
+
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static io.restassured.RestAssured.given;
+
 import static org.hamcrest.MatcherAssert.assertThat;
 
 import static org.hamcrest.core.IsEqual.equalTo;
 
 public class getMethod extends AbstractTest {
 
+
     @Test
     void getAllUsers() {
-       given()
+        given()
                 .when()
                 .get((String) properties.get("geturl") + "/users?page={page}", 2)
+                .prettyPeek()
                 .then()
-               .body("page", equalTo(2))
-               .statusCode(200);
+                .spec(responseGoodSpecification)
+                .body("page", equalTo(2));
+
     }
+
 
     @Test
     public void getSingleUser() {
-     String str  = given()
+        String str = given()
                 .when()
                 .get((String) properties.get("geturl") + "/users?id={id}", 12)
                 .prettyPeek()
                 .then()
-                //.contentType(ContentType.JSON)
+                .spec(responseGoodSpecification)
                 .body("data.first_name", equalTo("Rachel"))
                 .body("data.avatar", equalTo("https://reqres.in/img/faces/12-image.jpg"))
-                .statusCode(200).extract().response().jsonPath().getString("data.last_name");
+                .extract().response().jsonPath().getString("data.last_name");
         System.out.println(str);
-       // assertThat("Howell", equalTo("Howell"));
-
-
     }
+
+    /*
+    //Где ошибка?
+        @Test
+        public void getSingleUserPojo() {
+
+        UserDTO user = given()
+                    .when()
+                    .get((String) properties.get("geturl") + "/users?id={id}", 12)
+                    .prettyPeek()
+                    .then()
+                    .statusCode(200)
+                    .extract()
+                    .body()
+                    .as(UserDTO.class);
+          assertThat(user.getData().getEmail(),equalTo("rachel.howell@reqres.in"));
+        System.out.println(user.getData());
+
+    }*/
 
     @Test
     public void getParamUser() {
@@ -46,9 +69,9 @@ public class getMethod extends AbstractTest {
                 .when()
                 .get((String) properties.get("geturl") + "/users?id={id}", 7)
                 .then()
-                .contentType(ContentType.JSON)
-                .body("data.first_name", equalTo("Michael"))
-                .statusCode(200);
+                .spec(responseGoodSpecification)
+                .body("data.first_name", equalTo("Michael"));
+
 
 
     }
@@ -59,9 +82,7 @@ public class getMethod extends AbstractTest {
                 .when()
                 .get((String) properties.get("geturl") + "/users?id={id}", 8)
                 .then()
-                .statusCode(200)
-                .log()
-                .body()
+                .spec(responseGoodSpecification)
                 .body("data.first_name", equalTo("Lindsay"))
                 .body("data.email", equalTo("lindsay.ferguson@reqres.in"))
                 .extract()
@@ -78,7 +99,7 @@ public class getMethod extends AbstractTest {
                 .when()
                 .get((String) properties.get("geturl") + "/unknown?id={id}", 2)
                 .then()
-                .statusCode(200)
+                .spec(responseGoodSpecification)
                 .log()
                 .body()
                 .body("data.id",equalTo(2));
@@ -93,7 +114,7 @@ public class getMethod extends AbstractTest {
                 .get((String) properties.get("geturl") + "/unknown?id={id}", 44444444)
                 .prettyPeek()
                 .then()
-                 .statusCode(404);
+                .spec(responseNoGoodSpecification);
 
 
     }
@@ -107,12 +128,11 @@ public class getMethod extends AbstractTest {
                 .when()
                 .request("GET","https://reqres.in/api/users?id={id}", "Janet")
                 .then()
-                .statusCode(404);
+                .spec(responseNoGoodSpecification);
 
 
 
     }
-
     @Test
     public void findImage (){
 
